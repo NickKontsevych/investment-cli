@@ -1,7 +1,7 @@
 import sqlite3
 import logging
 from modules.database import get_db_connection
-from modules.portfolio import update_portfolio
+from modules.portfolio import update_portfolio, save_portfolio_snapshot
 
 # Логування помилок
 logging.basicConfig(filename="log.txt", level=logging.ERROR, format="%(asctime)s - %(levelень)s - %(message)s")
@@ -45,6 +45,9 @@ def add_transaction(date, type, ticker=None, quantity=None, price=None, fee_perc
             # Оновлення портфеля автоматично при BUY/SELL
             if type in ["BUY", "SELL"]:
                 update_portfolio(ticker, quantity, price, type)
+
+            # Викликаємо оновлення історії портфеля після будь-якої транзакції
+            save_portfolio_snapshot()
     
     except sqlite3.Error as e:
         logging.error(f"❌ Помилка при додаванні транзакції: {e}")
