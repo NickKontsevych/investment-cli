@@ -3,7 +3,7 @@ import csv
 import termgraph
 from prettytable import PrettyTable
 from modules.transactions import get_transactions
-from modules.portfolio import get_portfolio
+from modules.portfolio import get_portfolio, get_portfolio_history
 from modules.dividends import get_dividends
 
 def show_transactions():
@@ -32,6 +32,10 @@ def show_dividends():
 
 def export_to_csv(data, filename, headers):
     """Експортує дані у CSV."""
+    if not data:
+        print(f"⚠️ Немає даних для експорту ({filename}).")
+        return
+
     with open(filename, "w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(headers)  # Записуємо заголовки
@@ -72,21 +76,43 @@ def show_summary():
         with open("portfolio_data.txt", "w") as f:
             f.write("# Portfolio Distribution\n")
             for row in portfolio:
-                f.write(f"{row[0]}, {row[1]}\n")  # Тікер, кількість акцій
+                f.write(f"{row[0]} {row[1]}\n")  # Тікер, Кількість акцій (без коми)
 
         # Викликаємо termgraph через командний рядок
-        # os.system("termgraph portfolio_data.txt --color {blue,green}")
         os.system("termgraph portfolio_data.txt")
 
         # Видаляємо тимчасовий файл після використання
         os.remove("portfolio_data.txt")
 
+def show_portfolio_history():
+    """Відображає історію змін портфеля у вигляді таблиці."""
+    history = get_portfolio_history()
+    
+    if not history:
+        print("📉 Історія портфеля порожня.")
+        return
+
+    table = PrettyTable(["Дата", "Тікер", "Кількість", "Середня ціна", "Загальна вартість"])
+    for row in history:
+        table.add_row(row)
+    print(table)
+
 def main():
     parser = argparse.ArgumentParser(description="Investment CLI - Управління інвестиціями")
-    parser.add_argument("command", help="Команда: transactions, portfolio, dividends, export, summary")
+    parser.add_argument("command", help="Команда: transactions, portfolio, dividends, export, summary, portfolio_history")
     parser.add_argument("--type", help="Тип експорту (transactions, portfolio, dividends)", required=False)
 
     args = parser.parse_args()
+
+    if args.command not in ["transactions", "portfolio", "dividends", "export", "summary", "portfolio_history"]:
+        print("❌ Невідома команда. Використовуйте одну з:")
+        print("   - transactions")
+        print("   - portfolio")
+        print("   - dividends")
+        print("   - export --type transactions|portfolio|dividends")
+        print("   - summary")
+        print("   - portfolio_history")
+        exit(1)
 
     if args.command == "transactions":
         show_transactions()
@@ -106,8 +132,8 @@ def main():
             print("❌ Невідомий тип експорту. Використовуйте: transactions, portfolio, dividends")
     elif args.command == "summary":
         show_summary()
-    else:
-        print("❌ Невідома команда. Використовуйте: transactions, portfolio, dividends, export, summary")
+    elif args.command == "portfolio_history":
+        show_portfolio_history()
 
 if __name__ == "__main__":
     main()

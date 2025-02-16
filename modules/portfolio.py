@@ -90,3 +90,20 @@ def save_portfolio_snapshot():
     except sqlite3.Error as e:
         logging.error(f"❌ Помилка при збереженні історії портфеля: {e}")
         print("❌ Помилка при збереженні історії портфеля.")
+
+def get_portfolio_history():
+    """Отримує історію змін портфеля."""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            SELECT date, ticker, quantity, avg_price, total_value 
+            FROM portfolio_history 
+            ORDER BY date DESC
+            """)
+            history = cursor.fetchall()
+            return history
+    
+    except sqlite3.Error as e:
+        logging.error(f"❌ Помилка при отриманні історії портфеля: {e}")
+        return []
