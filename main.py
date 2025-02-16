@@ -5,6 +5,7 @@ from prettytable import PrettyTable
 from modules.transactions import get_transactions
 from modules.portfolio import get_portfolio, get_portfolio_history
 from modules.dividends import get_dividends
+from modules.analytics import calculate_summary
 
 def show_transactions():
     """Відображає всі транзакції у вигляді таблиці."""
@@ -131,7 +132,7 @@ def main():
         else:
             print("❌ Невідомий тип експорту. Використовуйте: transactions, portfolio, dividends")
     elif args.command == "summary":
-        show_summary()
+        calculate_summary()
     elif args.command == "portfolio_history":
         show_portfolio_history()
 
